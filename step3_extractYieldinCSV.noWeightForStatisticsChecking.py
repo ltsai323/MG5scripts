@@ -28,8 +28,8 @@ def BinnedMainFunction(pETAbin, jETAbin, xAXIS, inTREE) ->BinnedHists:
 
     def fillcontent(histNAME, additionalSELECTION) -> None:
         drawopt1 = f'Particle_PT[phoIdx] >> {histNAME}'
-        drawopt2 = f'mcweight * ( {additionalSELECTION} && {basic_cut} )' # original version
-        #drawopt2 = f' ( {additionalSELECTION} && {basic_cut} )' # no mc weight version
+        #drawopt2 = f'mcweight * ( {additionalSELECTION} && {basic_cut} )' # original version
+        drawopt2 = f' ( {additionalSELECTION} && {basic_cut} )' # no mc weight version
         print(f'\n\n-----\n[BinnedMainFunction-LOG] intree.Draw("{drawopt1}","{drawopt2}")')
         inTREE.Draw( drawopt1, drawopt2 )
 
@@ -39,20 +39,6 @@ def BinnedMainFunction(pETAbin, jETAbin, xAXIS, inTREE) ->BinnedHists:
     fillcontent(h_xs_b  .GetName(), 'fabs(Particle_PID[jetIdx])==5                                 '.strip())
 
     ## no bin width needed in this code
-    def crosssection_to_differential_crosssection(pETAbin,jETAbin, hiST) -> None:
-        etabin_width = 1.
-        if pETAbin == 0: etabin_width *= 1.4442*2.
-        if pETAbin == 1: etabin_width *= (1.566-1.4442)*2.
-
-
-        for ptbin in range(1,hiST.GetNbinsX()+1):
-            evt_weight = 1./( hiST.GetBinWidth(ptbin) * etabin_width )
-            hiST.SetBinContent( ptbin, hiST.GetBinContent(ptbin) * evt_weight )
-            hiST.SetBinError  ( ptbin, hiST.GetBinError  (ptbin) * evt_weight )
-    crosssection_to_differential_crosssection(pETAbin,jETAbin, h_xs_pho)
-    crosssection_to_differential_crosssection(pETAbin,jETAbin, h_xs_l  )
-    crosssection_to_differential_crosssection(pETAbin,jETAbin, h_xs_c  )
-    crosssection_to_differential_crosssection(pETAbin,jETAbin, h_xs_b  )
 
     out = BinnedHists()
     out.pho, out.l, out.c, out.b = (h_xs_pho,h_xs_l,h_xs_c,h_xs_b)
@@ -69,15 +55,23 @@ def Record(csvCONTENT:CSVWriter, pETAbin:int,jETAbin:int, binnedHISTs:BinnedHist
             'pEtaBin': pETAbin,
             'jEtaBin': jETAbin,
             'pPtBin': pptbin,
-            'crossSection': vPho[0],
-            'crossSectionError': vPho[1],
-            'crossSectionL': vL[0],
-            'crossSectionLError': vL[1],
-            'crossSectionC': vC[0],
-            'crossSectionCError': vC[1],
-            'crossSectionB': vB[0],
-            'crossSectionBError': vB[1],
+            'yield': vPho[0],
+            #'yieldError': 0.,
+            'yieldL': vL[0],
+            #'yieldLError': 0.,
+            'yieldC': vC[0],
+            #'yieldCError': 0.,
+            'yieldB': vB[0],
+            #'yieldBError': 0.,
         } )
+        statistics_threshold = 20.
+        show_content = False
+        if vPho[0] < statistics_threshold: show_content = True
+        elif vL[0] < statistics_threshold: show_content = True
+        elif vC[0] < statistics_threshold: show_content = True
+        elif vB[0] < statistics_threshold: show_content = True
+        if show_content:
+            INFO(f'Low statistics @bin_{pETAbin}_{jETAbin}_{pptbin} since pt{binnedHISTs.pho.GetXaxis().GetBinLowEdge(pptbin)} pho-{vPho[0]:.0f} L-{vL[0]:.0f} C-{vC[0]:.0f} B-{vB[0]:.0f}')
 
 if __name__ == "__main__":
     import sys
@@ -98,7 +92,7 @@ if __name__ == "__main__":
     hhh11 = BinnedMainFunction(1,1, bin_phopt, intree)
 
     import csv
-    outputname = '.'.join( infile.GetName().split('.')[:-1] ) + '.csv'
+    outputname = '.'.join( infile.GetName().split('.')[:-1] ) + '_yieldCheckForStatistics.csv'
     INFO(f'output CSV file is {outputname}')
     csv_out = CSVWriter(outputname)
     Record(csv_out,0,0,hhh00)
