@@ -2,6 +2,7 @@
 
 
 if __name__ == "__main__":
+    import sys
     inFILEname = sys.argv[1]
     #inFILEname = 'in_mergeMG5Result.gjet_NLO_loop_sm_no_b_mass_CT14nlo/MG5result.csv'
     with open(inFILEname,'r') as infile:
