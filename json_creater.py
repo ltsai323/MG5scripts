@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
 
+def PrintHelp():
+    print('------- args -----')
+    print('1. input file name')
+    print('2. sorting method. The available string is "creationTime" and "defaultOrder"')
+    print('3. ptgmin definition. Separated by "," or " "\n\n')
+    exit(1)
 
-def ListRootFiles(inPATH:str):
-    import os
+import os
+def ListRootFiles(inPATH:str, sortingMETHOD:str):
     rootfiles = []
     objdir = inPATH+'/Events/'
 
     contents = os.listdir(objdir)
-    # creation time orderd to let ptgmin from small to large
-    contents = sorted(contents, key=lambda item: os.path.getctime(os.path.join(objdir, item)))
+    if sortingMETHOD == 'creationTime':
+        # creation time orderd to let ptgmin from small to large
+        contents = sorted(contents, key=lambda item: os.path.getctime(os.path.join(objdir, item)))
+    elif sortingMETHOD == 'defaultOrder':
+        pass # use original sorting
+    else:
+        PrintHelp()
     for items in contents:
         if len(items) < 6: continue
         if not items.endswith('.root'): continue
@@ -28,11 +39,18 @@ def PtGmin(rawPTGminLIST, sizeOFrootFILEs:int):
 
 if __name__ == "__main__":
     import sys
+    if len(sys.argv) < 2+1: PrintHelp()
     inPATH = sys.argv[1]
     if '/' == inPATH[-1]: inPATH = inPATH[:-1]
-    ptgminLIST = sys.argv[2:]
 
-    root_files = ListRootFiles(inPATH)
+    # 'creationTime' and 'defaultOrder'
+    sortingMETHOD = sys.argv[2]
+
+
+    hasptSetup = len(sys.argv)>2
+    ptgminLIST = sys.argv[3:] if hasptSetup else []
+
+    root_files = ListRootFiles(inPATH, sortingMETHOD)
     print('[INFO] Loaded Root Files')
     for rootfile in root_files:
         print('  ->  '+rootfile)
@@ -49,4 +67,6 @@ if __name__ == "__main__":
                 for ptcut,rootfile in zip(ptgmin_list,root_files) ]
         ofile.write( json.dumps(output_content, indent=2))
         print(f'[INFO] output file is {output_json_file}')
+
+    os.system(f'ln -s {output_json_file}')
 
