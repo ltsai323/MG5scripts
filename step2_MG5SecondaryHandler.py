@@ -33,7 +33,7 @@ if __name__ == "__main__":
     outtag = '.'.join( infile.split('.')[:-1] )
 
     output_folder = outtag
-    if not os.path.exist(output_folder): raise IOError(f'[step2_MG5SecondaryHandler.py-Error] - output folder {output_folder} not found')
+    if not os.path.exists(output_folder): raise IOError(f'[step2_MG5SecondaryHandler.py-Error] - output folder {output_folder} not found')
     if not os.path.isdir(output_folder): raise IOError(f'[step2_MG5SecondaryHandler.py-Error] - output folder {output_folder} not found')
     with open(infile,'r') as infile:
         loadList = json.load(infile)
