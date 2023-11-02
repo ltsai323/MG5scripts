@@ -1,54 +1,42 @@
 #!/usr/bin/env sh
 lhapdf_id=$1
 lhapdf_name=$2
-out_folder=gjet_NLO_loop_sm_no_b_mass_${lhapdf_name}
 
-touch $out_folder ; /bin/rm -rf $out_folder
-
-run_info=info_${out_folder}.txt
-cat > $run_info <<EOF
-Used LHAPDF PDF set : $lhapdf_name
-            ID : $lhapdf_id
-EOF
-
-
-mg5_script=run_${out_folder}.txt
-cat > $mg5_script <<EOF
-set lhapdf /cvmfs/cms.cern.ch/slc7_amd64_gcc900/cms/cmssw/CMSSW_11_3_4/external/slc7_amd64_gcc900/bin/lhapdf-config
-set fastjet /afs/cern.ch/work/l/ltsai/Work/HiggsCombine/CMSSW_11_3_4/src/MG5_aMC_v3_4_2/HEPTools/fastjet/bin/fastjet-config
+function the_exit() { echo -e "\n\n $1 \n\n"; exit 1; }
+function init() {
+runFILE=$1
+outFOLDER=$2
+cat > $runFILE <<EOF
+set lhapdf lhapdf-config
 import model loop_sm-no_b_mass
-generate p p > j a [QCD]
-output $out_folder
+define bc = b b~ c c~
+generate p p > bc a [QCD]
+output $outFOLDER
 EOF
-
-function fill_run_info() {
-inLABEL=$1
-phoPTmin=$2
-cat >> $mg5_script <<EOF
-launch -n $inLABEL
-set pdlabel = lhapdf
-set lhaid = $lhapdf_id
-set nevents 100000
-set ebeam 6500
-set ebeam 6500
-set ptj = 30
-set etaj = 2.4
-set ptgmin = $phoPTmin
-set etagamma = 2.5
-EOF
+./bin/mg5_aMC $runFILE || the_exit "run file $runFILE is not able to initialize ./bin/mg5_aMC";
+mkdir $outFOLDER/Events/accomplished;
 }
 
-#fill_run_info bin1 30
-#fill_run_info bin2 55
-#fill_run_info bin3 100
-fill_run_info bin4 140
-#fill_run_info bin5 200
-#fill_run_info bin6 300
-#fill_run_info bin7 500
-
-./bin/mg5_aMC $mg5_script
-
-mv $mg5_script $out_folder/Events/
-mv $run_info   $out_folder/Events/
 
 
+## program start
+out_folder=gjet_NLO_loop_sm_no_b_mass_${lhapdf_name}_bcONLY
+
+touch $out_folder ; /bin/rm -rf $out_folder || the_exit "clean up failed"
+run_file=$PWD/run_init_${lhapdf_name}.txt
+init $run_file $out_folder || the_exit "initialize failed"
+cd $out_folder || the_exit "change directory failed"
+mv $run_file Events/
+
+python3 ../run_card_generator.py $lhapdf_name $lhapdf_id || the_exit "run card generation failed"
+
+### execute
+for a in `ls -t Events/run_card_*.dat`; do
+    cp $a Cards/run_card.dat || the_exit "failed to copy $a to run_card.dat"
+    name_1=`basename $a`
+    name_2=${name_1#run_card_}
+    name=${name_2%.dat}
+
+    ./bin/generate_events aMC@NLO -n $name -f 
+    mv $a Events/accomplished/
+done
