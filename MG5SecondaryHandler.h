@@ -146,12 +146,7 @@ MG5SecondaryHandler::MG5SecondaryHandler(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../old/gjet_NLO_loop_sm_no_b_mass_CT14nnlo/Events/lowPT.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("../old/gjet_NLO_loop_sm_no_b_mass_CT14nnlo/Events/lowPT.root");
-      }
-      f->GetObject("LHEF",tree);
-
+       return;
    }
    Init(tree);
 }
