@@ -1,5 +1,5 @@
-inFOLDER=$1
-inPTcut=30,55,100,140,200,300,500
+inFOLDER=`realpath $1`
+inPTcut=$2
 
 
 sh convertTOroot.sh $inFOLDER

@@ -12,6 +12,11 @@ if __name__ == "__main__":
         csv_out = []
         for evt in csv_reader:
             frac = lambda xNAME: float(evt[xNAME]) / float(evt['crossSection'])
+            def frac(xNAME):
+                u=float(evt[xNAME])
+                d=float(evt['crossSection'])
+                if d == 0: return 0
+                return u/d
             err  = lambda xNAME: 0
 
             fracL = frac('crossSectionL')

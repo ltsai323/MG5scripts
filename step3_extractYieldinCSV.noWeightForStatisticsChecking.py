@@ -72,6 +72,23 @@ def Record(csvCONTENT:CSVWriter, pETAbin:int,jETAbin:int, binnedHISTs:BinnedHist
         elif vB[0] < statistics_threshold: show_content = True
         if show_content:
             INFO(f'Low statistics @bin_{pETAbin}_{jETAbin}_{pptbin} since pt{binnedHISTs.pho.GetXaxis().GetBinLowEdge(pptbin)} pho-{vPho[0]:.0f} L-{vL[0]:.0f} C-{vC[0]:.0f} B-{vB[0]:.0f}')
+def RecordSummantion(csvCONTENT:CSVWriter, pETAbin:int,jETAbin:int, bHISTlist:list):
+    if len(bHISTlist) == 0: raise IOError('RecordSummantion() : Nothing in inputHISTlist')
+    sumhist = BinnedHists()
+    sumhist.b = bHISTlist[0].b.Clone()
+    sumhist.c = bHISTlist[0].c.Clone()
+    sumhist.l = bHISTlist[0].l.Clone()
+    sumhist.pho = bHISTlist[0].pho.Clone()
+
+    for bhist in bHISTlist[1:]:
+        sumhist.b.Add(bhist.b)
+        sumhist.c.Add(bhist.c)
+        sumhist.l.Add(bhist.l)
+        sumhist.pho.Add(bhist.pho)
+    Record(csvCONTENT, pETAbin,jETAbin,sumhist)
+
+
+
 
 if __name__ == "__main__":
     import sys
@@ -83,7 +100,7 @@ if __name__ == "__main__":
 
     from py_pt_ranges_definition import PhoPtBinning
     from array import array
-    dataEra = 'UL2016'
+    dataEra = 'UL2016PreVFP'
     bin_phopt = array('d',PhoPtBinning(dataEra))
 
     hhh00 = BinnedMainFunction(0,0, bin_phopt, intree)
@@ -100,3 +117,11 @@ if __name__ == "__main__":
     Record(csv_out,1,0,hhh01)
     Record(csv_out,1,1,hhh11)
     csv_out.Write()
+
+    # checking for endcap region
+    outputname = '.'.join( infile.GetName().split('.')[:-1] ) + '_yieldCheckForStatistics_noJetSel.csv'
+    INFO(f'output CSV file is {outputname}')
+    csv_out_ = CSVWriter(outputname)
+    Record(csv_out,0,0,[hhh00,hhh01])
+    Record(csv_out,1,0,[hhh10,hhh11])
+    csv_out_.Write()

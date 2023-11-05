@@ -1,1 +1,1 @@
-/afs/cern.ch/work/l/ltsai/Work/HiggsCombine/CMSSW_11_3_4/src/xPhoton/macros/py_pt_ranges_definition.py
+/wk_cms/ltsai/CMSSW_11_3_4/src/xPhoton/macros/py_pt_ranges_definition.py

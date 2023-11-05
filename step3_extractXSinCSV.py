@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     from py_pt_ranges_definition import PhoPtBinning
     from array import array
-    dataEra = 'UL2016'
+    dataEra = 'UL2016PreVFP'
     bin_phopt = array('d',PhoPtBinning(dataEra))
 
     hhh00 = BinnedMainFunction(0,0, bin_phopt, intree)
