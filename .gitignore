@@ -1,0 +1,6 @@
+# ignore all files
+*
+
+# except some file
+!*.py
+!*.sh
