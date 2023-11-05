@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+
+def PrintHelp():
+    print('''
+
+            Requirement : Current directory should be MG5 respository. Such that the executable should be found in ./bin/generate_events
+            Usage :
+              1. Creation mode : Create a run_card_blahblah.dat. Fully controlled by command.
+                 - args: 1. pd label, 2. lha id 3. out label, 4. min pt cut on photon
+
+              2. Default mode : Create a list of run_card_blahblah.dat for basic use.
+                                  ('bin01', 30  ),
+                                  ('bin02', 55  ),
+                                  ('bin03', 100 ),
+                                  ('bin04', 135 ),
+                                  ('bin05', 175 ),
+                                  ('bin06', 200 ),
+                                  ('bin07', 220 ),
+                                  ('bin08', 300 ),
+                                  ('bin09', 400 ),
+                                  ('bin10', 500 ),
+                                  ('bin11', 700 ),
+                  - args: 1. pd label.  2. lha id
+              3. Test mode : Run default mode with default PDlabel 'NNPDF31_nlo_as_0118' and id '303400'
+                  - args: NONE
+                  ''')
+    raise IOError('Invalid input argument')
 run_card_template='''
 #***********************************************************************
 #                        MadGraph5_aMC@NLO                             *
@@ -217,6 +243,7 @@ run_card_template='''
   1, 1, 1	= folding ! correspond to folding in xi_i, y_ij, and phi_i
 #***********************************************************************
 '''
+def LOG(*args): print('[run_card_generator_single LOG] ',*args)
 
 class run_card_writer:
     pdlabel = ''
@@ -231,7 +258,8 @@ class run_card_writer:
 
     def Write(self,outFOLDER:str, ptGmin:int):
         self.ptgmin = ptGmin
-        with open(f'Events/run_card_{outFOLDER}.dat','w') as ofile:
+        ofilename=f'run_card_{outFOLDER}@{ptGmin}.dat'
+        with open(ofilename,'w') as ofile:
             ofile.write(
                 run_card_template.format(
                     #pdLABEL = self.pdlabel,
@@ -243,41 +271,95 @@ class run_card_writer:
                     etaGAMMA= self.etagamma,
                     iSEED   = self.iseed,
                     ) )
+            LOG(f'{ofilename} generated')
 
+def initRunSummary(pdLABEL:str, lhaID:int):
+    with open('run_summary.txt', 'w') as ofile:
+        ofile.write(f'pdlabel: {pdLABEL}\n')
+        ofile.write(f'lhaid  : {lhaID}\n')
+def addRunSummary(binNAME:str, ptGmin:int):
+    with open('run_summary.txt', 'a') as ofile:
+        ofile.write(str( (binNAME,ptGmin) ) + '\n')
 
-if __name__ == "__main__":
-    import sys
-    pdLABEL, lhaID = sys.argv[1:]
-
+def mainfunc(
+        outLABEL:str,
+        ptMIN:int,
+        pdLABEL:str,
+        lhaID:int ):
     writer = run_card_writer()
     writer.pdlabel  = pdLABEL
-    writer.lhaid    = int(lhaID)
-    writer.nevents  = 10000
+    writer.lhaid    = lhaID
+    writer.nevents  = 100000
     writer.iseed    = 0
 
     writer.ptj      = 30.
     writer.etaj     = 2.4
     writer.etagamma = 2.5
 
-    bin_separations = [
-            ('bin01', 30  ),
-            ('bin02', 55  ),
-            ('bin03', 100 ),
-            ('bin04', 135 ),
-            ('bin05', 175 ),
-            ('bin06', 200 ),
-            ('bin07', 220 ),
-            ('bin08', 300 ),
-            ('bin09', 400 ),
-            ('bin10', 500 ),
-            ('bin11', 700 ),
-            ]
-    for outLABEL, ptMIN in bin_separations:
-        writer.Write(outLABEL,ptMIN)
+    writer.Write(outLABEL,ptMIN)
 
-    # write summary
-    with open(f'Events/run_summary.txt','w') as ofile:
-        ofile.write(f'pdlabel: {pdLABEL}\n')
-        ofile.write(f'lhaid  : {lhaID}\n')
-        for theBIN in bin_separations:
-            ofile.write( str(theBIN) + '\n')
+    addRunSummary(outLABEL,ptMIN)
+
+
+if __name__ == "__main__":
+    import sys
+    argnum = len(sys.argv)
+    if argnum != 5 and argnum != 3 and argnum != 1: PrintHelp()
+
+    if argnum == 5:
+        # creation usage
+        # args: 1. pd label, 2. lha id 3. out label, 4. min pt cut on photon 
+        #  append mode
+        pdLABEL, lhaID, outLABEL, ptMIN = sys.argv[1:]
+        #outLABEL, ptMIN, pdLABEL, lhaID = sys.argv[1:]
+        LOG('----- Creation mode -----')
+
+        #initRunSummary(pdLABEL, int(lhaID))
+        mainfunc(outLABEL, int(ptMIN), pdLABEL, int(lhaID))
+    else:
+        # default values
+        # args: 1.pd label. 2. lha id
+        isDefaultMode = True if argnum == 3 else False
+        if isDefaultMode: LOG('----- Default mode -----')
+        else:             LOG('-----   Test  mode -----')
+
+        pdLABEL = sys.argv[1] if isDefaultMode else 'NNPDF31_nlo_as_0118'
+        lhaID   = sys.argv[2] if isDefaultMode else '303400'
+
+        bin_separations = [
+                ('bin01', 30  ),
+                ('bin02', 55  ),
+                ('bin03', 100 ),
+                ('bin04', 135 ),
+                ('bin05', 175 ),
+                ('bin06', 200 ),
+                ('bin07', 220 ),
+                ('bin08', 300 ),
+                ('bin09', 400 ),
+                ('bin10', 500 ),
+                ('bin11', 700 ),
+                ]
+
+        initRunSummary(pdLABEL, int(lhaID))
+        for outLABEL, ptMIN in bin_separations:
+            mainfunc(outLABEL, int(ptMIN), pdLABEL, int(lhaID))
+
+    put_to_Events=True
+    if put_to_Events:
+        import shutil
+        import glob
+        files_to_move = glob.glob('./' + "run_card_*.dat")
+
+        dest_dir = 'Events/'
+        for file in files_to_move:
+            LOG(f'moving {file} to {dest_dir}')
+            shutil.move(file, dest_dir)
+
+        with open('Events/run_summary.txt', 'a') as orig_file, open('run_summary.txt', 'r') as new_file:
+            new_content = new_file.read()
+            orig_file.write(new_content)
+
+        import os
+        os.remove('run_summary.txt')
+        print(f'output files are stored at {os.getcwd()}/Events/')
+

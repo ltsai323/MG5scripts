@@ -3,7 +3,9 @@
 function code_exec()
 { sh gjet_NLO_loop_sm_no_b_mass_general.sh $1 $2 > log_"$2" 2>&1 ; }
 function code_test()
-{ sh gjet_NLO_loop_sm_no_b_mass_general.sh $1 $2 ; }
+{ sh gjet_NLO_loop_sm_no_b_mass_general.sh $1 $2 TEST; }
+function code_append_newbins()
+{ sh gjet_NLO_loop_sm_no_b_mass_general.sh $1 $2 append; }
 
 #code_test 303400 TEST_NNPDF31_nlo_as_0118
 
