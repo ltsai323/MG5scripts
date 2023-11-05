@@ -2,7 +2,7 @@
 
 def PrintHelp():
     print('------- args -----')
-    print('1. input file name')
+    print('1. input madgraph directory name')
     print('2. sorting method. The available string is "creationTime" and "defaultOrder"')
     print('3. ptgmin definition. Separated by "," or " "\n\n')
     exit(1)
@@ -17,7 +17,7 @@ def ListRootFiles(inPATH:str, sortingMETHOD:str):
         # creation time orderd to let ptgmin from small to large
         contents = sorted(contents, key=lambda item: os.path.getctime(os.path.join(objdir, item)))
     elif sortingMETHOD == 'defaultOrder':
-        pass # use original sorting
+        contents = sorted(contents)
     else:
         PrintHelp()
     for items in contents:
