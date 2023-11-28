@@ -122,6 +122,6 @@ if __name__ == "__main__":
     outputname = '.'.join( infile.GetName().split('.')[:-1] ) + '_yieldCheckForStatistics_noJetSel.csv'
     INFO(f'output CSV file is {outputname}')
     csv_out_ = CSVWriter(outputname)
-    Record(csv_out,0,0,[hhh00,hhh01])
-    Record(csv_out,1,0,[hhh10,hhh11])
+    RecordSummantion(csv_out_,0,0,[hhh00,hhh01])
+    RecordSummantion(csv_out_,1,0,[hhh10,hhh11])
     csv_out_.Write()

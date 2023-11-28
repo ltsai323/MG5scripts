@@ -15,7 +15,7 @@ for trgdir in `ls -t -d $workdir/*/`; do
     loadFILE=${trgdir}/events.lhe.gz
     processFILE=${trgdir}/events.lhe
 
-    echo -e "\n\n------ checking directory `basename $trgdir`"
+    echo -e "\n------ checking directory `basename $trgdir`"
     if [ -e $loadFILE ]; then gzip -d $loadFILE ;
     else echo "[File not found - ignore unzip] `basename $loadFILE`"   ; fi
     if [ ! -e $processFILE ]; then

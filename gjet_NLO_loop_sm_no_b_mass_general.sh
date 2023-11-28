@@ -41,7 +41,7 @@ done
 
 
 
-out_folder=gjet_NLO_loop_sm_no_b_mass_${lhapdf_name}_bcONLY
+out_folder=gjet_NLO_loop_sm_no_b_mass_${lhapdf_name}
 if [ $# -eq 2 ]; then
     #### execute all program
     the_echo 'creat new MG5 repository'

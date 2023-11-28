@@ -2,6 +2,8 @@
 import ROOT
 import csv
 
+def INFO(*args): print('[step3_tools LOG] ', *args)
+def BUG(*args): pass
 
 def phosel(pETAbin) -> str:
     if pETAbin == 0:
@@ -36,13 +38,41 @@ class CSVWriter:
     def __init__(self, outNAME:str):
         self.ofile = outNAME
         self.content = []
+        INFO(f'CSVWriter::init() output CSV file is {outNAME}')
     def Write(self):
+        if len(self.content) == 0:
+            INFO(f'nothing written to {self.ofile}')
+            return
         with open(self.ofile, 'w') as newfile:
             csvwritter = csv.DictWriter(newfile, fieldnames=self.content[0].keys())
             csvwritter.writeheader()
             csvwritter.writerows(self.content)
+            INFO(f'successful write {self.ofile}')
 
     def append_data(self, inputDATA) -> None:
+        # update if found
+        for idx,content in enumerate(self.content):
+            if inputDATA['pPtBin' ] != content['pPtBin' ]: continue
+            if inputDATA['pEtaBin'] != content['pEtaBin']: continue
+            if inputDATA['jEtaBin'] != content['jEtaBin']: continue
+            for key in inputDATA.keys():
+                if key == 'pPtBin' : continue
+                if key == 'pEtaBin': continue
+                if key == 'jEtaBin': continue
+
+                if 'error' in key.lower(): ## error : quadratic addition
+                    oldval = self.content[idx][key]
+                    newval = inputDATA[key]
+                    self.content[idx][key] = ( oldval**2+newval**2 )**0.5
+                    BUG(f'new error {self.content[idx][key]} = sqrt({newval}^2 + {oldval}^2)')
+
+                else: ## normal value : addition
+                    oldval = self.content[idx][key]
+                    newval = inputDATA[key]
+                    self.content[idx][key] += inputDATA[key]
+                    BUG(f'new value {self.content[idx][key]} = {newval} + {oldval}')
+            return
+        # if nothing found, append entry
         self.content.append(inputDATA)
 
     @classmethod

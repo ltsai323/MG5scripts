@@ -1,72 +1,53 @@
 #!/usr/bin/env python3
 
 def PrintHelp():
+    print('automatically loads inputPATH/Events/run_summary.txt and create pt sorted root files')
     print('------- args -----')
     print('1. input madgraph directory name')
-    print('2. sorting method. The available string is "creationTime" and "defaultOrder"')
-    print('3. ptgmin definition. Separated by "," or " "\n\n')
     exit(1)
 
 import os
-def ListRootFiles(inPATH:str, sortingMETHOD:str):
-    rootfiles = []
-    objdir = inPATH+'/Events/'
 
-    contents = os.listdir(objdir)
-    if sortingMETHOD == 'creationTime':
-        # creation time orderd to let ptgmin from small to large
-        contents = sorted(contents, key=lambda item: os.path.getctime(os.path.join(objdir, item)))
-    elif sortingMETHOD == 'defaultOrder':
-        contents = sorted(contents)
-    else:
-        PrintHelp()
-    for items in contents:
-        if len(items) < 6: continue
-        if not items.endswith('.root'): continue
-        rootfiles.append( os.path.abspath(objdir+items) )
-    return rootfiles
+def ReadBinning(inPATH:str):
+    with open(inPATH+'/Events/run_summary.txt','r') as ifile:
+        valid_lines = ( line.strip() for line in ifile.readlines() if '(' in line )
+        pt_rootFile_map = {}
+        for line in valid_lines:
+            bin_name,pt_cut = eval(line)
+            root_file=bin_name+'.root'
+            rel_root_file = inPATH+'/Events/'+root_file
+            abs_root_file = os.path.abspath(rel_root_file)
+            print(f'\n----- checking {rel_root_file}')
 
-def PtGmin(rawPTGminLIST, sizeOFrootFILEs:int):
-    sizeOFptgminLIST = len(rawPTGminLIST)
-
-    out = rawPTGminLIST
-    if sizeOFptgminLIST == 0: out = [0] * sizeOFrootFILEs
-    if sizeOFptgminLIST == 1: out = rawPTGminLIST[0].split(',')
-
-    if len(out) != sizeOFrootFILEs:
-        raise IOError(f'[Error] Input pt min cuts({len(out)}) is incompetible with loaded root files ({sizeOFrootFILEs})')
-    return out
+            pt_rootFile_map[pt_cut] = abs_root_file
+            if not os.path.exists(abs_root_file):
+                raise IOError(f'[File not found - Error] @pt{pt_cut}. {abs_root_file} doesn\'t exist')
+            print(f'[LOG] valid {root_file}')
+        print(f'[LOG] All related ROOT files prepared.')
+        return pt_rootFile_map
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) < 2+1: PrintHelp()
+    if len(sys.argv) < 1+1: PrintHelp()
     inPATH = sys.argv[1]
     if '/' == inPATH[-1]: inPATH = inPATH[:-1]
-
-    # 'creationTime' and 'defaultOrder'
-    sortingMETHOD = sys.argv[2]
+    if not os.path.exists(inPATH): raise IOError('[Folder not found - Error] {inPATH}')
 
 
-    hasptSetup = len(sys.argv)>2
-    ptgminLIST = sys.argv[3:] if hasptSetup else []
-
-    root_files = ListRootFiles(inPATH, sortingMETHOD)
-    print('[INFO] Loaded Root Files')
-    for rootfile in root_files:
-        print('  ->  '+rootfile)
-
-
-    ptgmin_list = PtGmin(ptgminLIST,len(root_files))
+    pt_rootFile_map = ReadBinning(inPATH)
 
 
     import json
     output_json_file = inPATH+'.json'
     with open(output_json_file,'w') as ofile:
         output_content = [
-                { 'ptgmin': ptcut, 'rootfile': rootfile }
-                for ptcut,rootfile in zip(ptgmin_list,root_files) ]
+                { 'ptgmin': ptcut, 'rootfile': pt_rootFile_map[ptcut] }
+                for ptcut in sorted(pt_rootFile_map.keys()) ]
         ofile.write( json.dumps(output_content, indent=2))
         print(f'[INFO] output file is {output_json_file}')
 
-    os.system(f'ln -s {output_json_file}')
-
+    if os.path.exists( os.path.basename(output_json_file) ):
+        print(f'[Link existed - Warning] Output file {output_json_file} created. But no link put to current directory.')
+    else:
+        os.system(f'ln -s {output_json_file}')
+        print(f'[Link Created - LOG] Output file {output_json_file} created. Create a link to current directory')

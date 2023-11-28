@@ -30,7 +30,9 @@ if __name__ == "__main__":
     import sys
     #$infile = 'in_mergeMG5Result.gjet_NLO_loop_sm_no_b_mass_CT14nlo.json'
     infile = sys.argv[1]
-    outtag = '.'.join( infile.split('.')[:-1] )
+    filename = os.path.basename(infile)
+    outtag = os.path.splitext(filename)[0]
+
 
     output_folder = outtag
     if not os.path.exists(output_folder): raise IOError(f'[step2_MG5SecondaryHandler.py-Error] - output folder {output_folder} not found')
