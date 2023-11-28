@@ -28,34 +28,34 @@ def draw_scatter_plot(
 
 if __name__ == "__main__":
     f1 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118/MG5result_mcPredicted_c.csv',
+            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118/MG5result_mcPredicted_leading_c.csv',
             '5NFS intrinsic charm')
     f2 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118_nf_4/MG5result_mcPredicted_c.csv',
+            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118_nf_4/MG5result_mcPredicted_leading_c.csv',
             '4NFS intrinsic charm')
     f3 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118/MG5result_mcPredicted_c.csv',
+            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118/MG5result_mcPredicted_leading_c.csv',
             '5NFS perturbative charm')
     f4 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118_nf_4/MG5result_mcPredicted_c.csv',
+            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118_nf_4/MG5result_mcPredicted_leading_c.csv',
             '4NFS perturbative charm')
 
     def task(draw_obj):
-        the_title = 'MC predicted $\gamma$+C yield in NNPDF3.1 NLO'
+        the_title = '$\gamma$+c yield predicted by PDF NNPDF3.1 NLO'
         draw_obj.DrawSingle( f1,f2,f3,f4,
-                inTITLE=the_title,
+                inTITLE = the_title,
             outFIGtemplate='all.pdf')
         draw_obj.DrawSingle( f1,
-                inTITLE=the_title,
+                inTITLE = the_title,
             outFIGtemplate='NNPDF31_nlo_as_0118.pdf')
         draw_obj.DrawSingle( f2,
-                inTITLE=the_title,
+                inTITLE = the_title,
             outFIGtemplate='NNPDF31_nlo_as_0118_nf_4.pdf')
         draw_obj.DrawSingle( f3,
-                inTITLE=the_title,
+                inTITLE = the_title,
             outFIGtemplate='NNPDF31_nlo_pch_as_0118.pdf')
         draw_obj.DrawSingle( f4,
-                inTITLE=the_title,
+                inTITLE = the_title,
             outFIGtemplate='NNPDF31_nlo_pch_as_0118_nf_4.pdf')
 
         printDetailComparison = True
@@ -73,6 +73,6 @@ if __name__ == "__main__":
         else:
             print('[INFO] No detailed plot generated')
 
-    tag='truthC'
-    task( DrawingProcess(draw_scatter_plot, HackData.barrel_data,'_'.join([tag,'barrelPho'])) )
-    task( DrawingProcess(draw_scatter_plot, HackData.endcap_data,'_'.join([tag,'endcapPho'])) )
+    tag = 'leadingC'
+    task( DrawingProcess(draw_scatter_plot,HackData.barrel_data,'_'.join([tag,'barrelPho'])) )
+    task( DrawingProcess(draw_scatter_plot,HackData.endcap_data,'_'.join([tag,'endcapPho'])) )
