@@ -65,52 +65,41 @@ def draw_scatter_plot(
 
 
 if __name__ == "__main__":
-    f1 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118/MG5result_mcPredicted_leading_c.csv',
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118/MG5result_mcPredicted_leading_b.csv',
-            '5NFS intrinsic charm')
-    f2 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118_nf_4/MG5result_mcPredicted_leading_c.csv',
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118_nf_4/MG5result_mcPredicted_leading_b.csv',
-            '4NFS intrinsic charm')
-    f3 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118/MG5result_mcPredicted_leading_c.csv',
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118/MG5result_mcPredicted_leading_b.csv',
-            '5NFS perturbative charm')
-    f4 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118_nf_4/MG5result_mcPredicted_leading_c.csv',
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118_nf_4/MG5result_mcPredicted_leading_b.csv',
-            '4NFS perturbative charm')
+    in_merge = lambda fq,fw: (fq.file,fw.file,fq.desc)
+    import makeplot_file_collecter as inputs
+    f1C = inputs.mcLeadingC_intrinsicC_0118_nf5
+    f2C = inputs.mcLeadingC_perturbativeC_0118_nf5
+    f3C = inputs.mcLeadingC_perturbativeC_0118_nf3
+    f1B = inputs.mcLeadingB_intrinsicC_0118_nf5
+    f2B = inputs.mcLeadingB_perturbativeC_0118_nf5
+    f3B = inputs.mcLeadingB_perturbativeC_0118_nf3
+
+    f1 = in_merge(f1C,f1B)
+    f2 = in_merge(f2C,f2B)
+    f3 = in_merge(f3C,f3B)
+
 
 
     def task(draw_obj):
         the_title = 'Truth ratio of $\gamma$+C / $\gamma$+b in NNPDF3.1 NLO @ leading jet selection'
-        draw_obj.DrawSingle( f1,f2,f3,f4,
-                inTITLE=the_title,
+        draw_obj.DrawSingle( f1,f2,f3, inTITLE=the_title,
             outFIGtemplate='AllMCCompare.pdf')
-        draw_obj.DrawSingle( f1,
-                inTITLE=the_title,
+        draw_obj.DrawSingle( f1, inTITLE=the_title,
             outFIGtemplate='NNPDF31_nlo_as_0118.pdf')
-        draw_obj.DrawSingle( f2,
-                inTITLE=the_title,
-            outFIGtemplate='NNPDF31_nlo_as_0118_nf_4.pdf')
-        draw_obj.DrawSingle( f3,
-                inTITLE=the_title,
+        draw_obj.DrawSingle( f2, inTITLE=the_title,
             outFIGtemplate='NNPDF31_nlo_pch_as_0118.pdf')
-        draw_obj.DrawSingle( f4,
-                inTITLE=the_title,
-            outFIGtemplate='NNPDF31_nlo_pch_as_0118_nf_4.pdf')
+        draw_obj.DrawSingle( f3, inTITLE=the_title,
+            outFIGtemplate='NNPDF31_nlo_pch_as_0118_nf3.pdf')
 
         printDetailComparison = True
         if printDetailComparison:
             print('[INFO] Generate detailed plot')
-            calculated_y_ranges = yRangeFinder_LinearScale( (get_data_point_endcap(f) for f in [f1,f2,f3,f4]) )
+            calculated_y_ranges = yRangeFinder_LinearScale( (get_data_point_endcap(f) for f in [f1,f2,f3]) )
             draw_obj.SetDetailPlotArgument( *calculated_y_ranges )
-            draw_obj.DrawDetail( f1,f2,f3,f4, inTITLE=the_title, outFIGtemplate='AllMCCompare.pdf')
+            draw_obj.DrawDetail( f1,f2,f3, inTITLE=the_title, outFIGtemplate='AllMCCompare.pdf')
             draw_obj.DrawDetail(f1, inTITLE=the_title, outFIGtemplate = 'NNPDF31_nlo_as_0118.pdf')
-            draw_obj.DrawDetail(f2, inTITLE=the_title, outFIGtemplate = 'NNPDF31_nlo_as_0118_nf_4.pdf')
-            draw_obj.DrawDetail(f3, inTITLE=the_title, outFIGtemplate = 'NNPDF31_nlo_pch_as_0118.pdf')
-            draw_obj.DrawDetail(f4, inTITLE=the_title, outFIGtemplate = 'NNPDF31_nlo_pch_as_0118_nf_4.pdf')
+            draw_obj.DrawDetail(f2, inTITLE=the_title, outFIGtemplate = 'NNPDF31_nlo_pch_as_0118.pdf')
+            draw_obj.DrawDetail(f3, inTITLE=the_title, outFIGtemplate = 'NNPDF31_nlo_pch_as_0118_nf3.pdf')
         else:
             print('[INFO] No detailed plot generated')
 

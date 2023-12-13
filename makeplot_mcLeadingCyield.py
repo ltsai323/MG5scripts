@@ -4,6 +4,7 @@ from makeplot_tools import  draw_EP
 from makeplot_ratiotool import draw_EP_ratio
 from makeplot_tools import XYscatterPoints
 from makeplot_drawingprocess import DrawingProcess,HackData
+from makeplot_drawingprocess import yRangeFinder_LinearScale
 
 def draw_scatter_plot(
         yRANGE:list,
@@ -27,36 +28,21 @@ def draw_scatter_plot(
 
 
 if __name__ == "__main__":
-    f1 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118/MG5result_mcPredicted_leading_c.csv',
-            '5NFS intrinsic charm')
-    f2 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_as_0118_nf_4/MG5result_mcPredicted_leading_c.csv',
-            '4NFS intrinsic charm')
-    f3 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118/MG5result_mcPredicted_leading_c.csv',
-            '5NFS perturbative charm')
-    f4 = (
-            'gjet_NLO_loop_sm_no_b_mass_NNPDF31_nlo_pch_as_0118_nf_4/MG5result_mcPredicted_leading_c.csv',
-            '4NFS perturbative charm')
+    import makeplot_file_collecter as inputs
+    f1 = inputs.Get(inputs.mcLeadingC_intrinsicC_0118_nf5)
+    f2 = inputs.Get(inputs.mcLeadingC_perturbativeC_0118_nf5)
+    f3 = inputs.Get(inputs.mcLeadingC_perturbativeC_0118_nf3)
 
     def task(draw_obj):
         the_title = '$\gamma$+c yield predicted by PDF NNPDF3.1 NLO'
-        draw_obj.DrawSingle( f1,f2,f3,f4,
-                inTITLE = the_title,
+        draw_obj.DrawSingle( f1,f2,f3, inTITLE = the_title,
             outFIGtemplate='all.pdf')
-        draw_obj.DrawSingle( f1,
-                inTITLE = the_title,
+        draw_obj.DrawSingle( f1, inTITLE = the_title,
             outFIGtemplate='NNPDF31_nlo_as_0118.pdf')
-        draw_obj.DrawSingle( f2,
-                inTITLE = the_title,
-            outFIGtemplate='NNPDF31_nlo_as_0118_nf_4.pdf')
-        draw_obj.DrawSingle( f3,
-                inTITLE = the_title,
+        draw_obj.DrawSingle( f2, inTITLE = the_title,
             outFIGtemplate='NNPDF31_nlo_pch_as_0118.pdf')
-        draw_obj.DrawSingle( f4,
-                inTITLE = the_title,
-            outFIGtemplate='NNPDF31_nlo_pch_as_0118_nf_4.pdf')
+        draw_obj.DrawSingle( f3, inTITLE = the_title,
+            outFIGtemplate='NNPDF31_nlo_pch_as_0118_nf3.pdf')
 
         printDetailComparison = True
         if printDetailComparison:
@@ -66,10 +52,9 @@ if __name__ == "__main__":
                     ('rangeHuge', (1e-3,300.)),
                     ('rangeTiny', (1e-2,5.)),
                     )
-            draw_obj.DrawDetail(f1,f2, inTITLE=the_title, outFIGtemplate = 'intrinsicC.pdf')
-            draw_obj.DrawDetail(f3,f4, inTITLE=the_title, outFIGtemplate = 'perturbativeC.pdf')
-            draw_obj.DrawDetail(f1,f3, inTITLE=the_title, outFIGtemplate = 'NF5.pdf')
-            draw_obj.DrawDetail(f2,f4, inTITLE=the_title, outFIGtemplate = 'NF4.pdf')
+            draw_obj.DrawDetail(f1,f2, inTITLE=the_title, outFIGtemplate = 'NF5.pdf')
+            draw_obj.DrawDetail(f2,f3, inTITLE=the_title, outFIGtemplate = 'perturbativeC.pdf')
+            draw_obj.DrawDetail(f1,f3, inTITLE=the_title, outFIGtemplate = 'mainTrg.pdf')
         else:
             print('[INFO] No detailed plot generated')
 

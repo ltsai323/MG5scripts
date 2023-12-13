@@ -6,6 +6,9 @@ import makeplot_tools as myTool
 from uncertainties import ufloat
 from dataclasses import dataclass
 
+PRINT_BUG = False
+def BUG(*args):
+    if PRINT_BUG: print('[BUG] ', *args)
 
 ## generator. Used in for loop. The first input becomes denominator. The others are numerator.
 from typing import Generator
@@ -14,10 +17,18 @@ def TakeRatio(xySCATTERwithDESC:[myTool.XYscatterPoints]) -> Generator[myTool.XY
     denominator = value_error_dict(xySCATTERwithDESC[0])
 
     for idx, xy_scatter_with_desc in enumerate(xySCATTERwithDESC[1:]):
+        BUG(xy_scatter_with_desc)
         numerator = value_error_dict(xy_scatter_with_desc)
+        BUG('numerator ', numerator)
+        BUG('denominator ', denominator)
 
-        xList = [                          x  for x in numerator.keys() if x in denominator ]
-        ratio = [ numerator[x]/denominator[x] for x in xList ]
+        xList = [                          x  for x in numerator.keys() if x in denominator and abs(denominator[x]) > 1e-12 ]
+        BUG(xList)
+        #ratio = [ numerator[x]/denominator[x] for x in xList ]
+        ratio = []
+        for x in xList:
+            BUG(' value a/b = %.3e/%.3e'%(numerator[x].nominal_value,denominator[x].nominal_value))
+            ratio.append(numerator[x]/denominator[x])
         yield myTool.XYscatterPoints(
                 x=xList, y=[r.nominal_value for r in ratio],y_err=[r.std_dev for r in ratio],desc=xy_scatter_with_desc.desc)
 
